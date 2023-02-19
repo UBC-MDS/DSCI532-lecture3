@@ -1,0 +1,376 @@
+---
+title: "L3 - Reactivity"
+institute: "Data Visualization II - DSCI 532 - MDS 2022/23"
+format:
+  revealjs:
+    logo: img/mdslogo.png
+    incremental: true  # bullets one by one 
+    smaller: true
+    scrollable: true
+    theme: custom.scss
+    slide-number: true
+    show-slide-number: print
+    chalkboard: true
+---
+
+## Lecture 3
+
+- Creating a **complex app** (>3 outputs)  
+
+- How to wrap `ggplot2` and `dplyr` function in a Shiny app? (**tidyevaluation**)
+
+- How can we improve our development **workflow**?  
+  
+- How to avoid code duplication? Intro to **reactive expressions**.
+
+
+---
+
+## 🙌 Today's goal
+#### Create a complex app and use reactive expressions
+
+**Mastering Shiny**    
+  
+- 📚 [Chapter 1 section 6 - Reducing duplication with reactive expressions](https://mastering-shiny.org/basic-app.html#reactive-expr)  
+  
+- 📚 [Chapter 5 - Workflow](https://mastering-shiny.org/action-workflow.html)  
+- 📚 [Chapter 12 -Tidyevaluation](https://mastering-shiny.org/action-tidy.html)  
+
+---
+
+## 🙌 Today's goal
+#### Create a complex app and use reactive expressions
+
+- 🌐 [Using `DT` in Shiny](https://rstudio.github.io/DT/shiny.html)  
+  
+- 🌐 [Using `lefleat` with Shiny](https://rstudio.github.io/leaflet/shiny.html) 
+  
+- 📚 [Improving `ggplotly` - Interactive web-based data visualization with R, plotly, and shiny (2019) Carson Sievert](https://plotly-r.com/improving-ggplotly.html)  
+
+
+---
+
+## DSCI 532 Overview
+
+![](img/532-overview-2023.png)
+
+
+
+
+# Creating a **complex app** (>3 outputs) {background-color="#F1FFFA"}
+
+
+---
+
+# Creating a **complex app** 
+
+- `leaflet` map
+- `DT` table
+- `ggplot()` + `ggplotly()`
+
+
+
+---
+
+# DEMO: Code a function {background-color="#F1FFFA"}
+
+---
+
+## The road to a production-grade app
+
+1. Motivation and purpose
+2. Select the results/metrics based on your target audience
+3. Choose presentation method and interactivity 
+4. Design the app (sketch)  
+
+:::{.fragment .highlight-blue}  
+5. Write the code of the app following a workflow  
+:::    
+
+6. Ensure the app's reproducibility and deploy it 
+
+
+::: footer
+Adapted from: Rasmussen, N. H., Bansal, M., & Chen, C. Y. (2009). Business dashboards: a visual catalog for design and deployment. John Wiley & Sons.
+:::
+
+
+# How can we improve our development **workflow**? {background-color="#F1FFFA"}
+
+---
+
+## Basic development cycle
+####  Creating the app
+
+Use a snippet to add the basic structure:
+
+```r
+library(shiny)
+ui <- fluidPage(
+)
+server <- function(input, output, session) {
+}
+shinyApp(ui, server)
+```
+
+---
+
+## Basic development cycle
+#### Seeing your changes
+
+1. Write some code.
+2. Launch the app with `Cmd/Ctrl` + `Shift` + `Enter.`
+3. Interactively experiment with the app.
+4. Close the app.
+5. Go to 1.
+
+---
+
+## Basic development cycle
+#### Seeing your changes
+
+1. Write some code.
+~~2. Launch the app with `Cmd/Ctrl` + `Shift` + `Enter.`~~
+3. Interactively experiment with the app.
+~~4. Close the app.~~
+5. Go to 1.
+
+`options(shiny.autoreload = TRUE)` ✅ 
+
+:::footer
+You can also create a [job](https://github.com/sol-eng/background-jobs/tree/master/shiny-job) to simplify the workflow
+:::
+---
+
+## Basic development cycle
+#### Seeing your changes
+
+ **Reloading the app frequently will avoid the "accumulation" of errors.**
+
+
+---
+
+## Basic development cycle
+#### Controlling the view
+The run app button allows you to choose how the running app will be shown.
+![](img/run-app.png){.absolute width=250}
+  
+:::footer  
+Mastering Shiny
+:::
+
+
+# Debugging
+> Once you eliminate the impossible, whatever remains, no matter how improbable, must be the truth — Sherlock Holmes
+
+:::footer
+Mastering Shiny
+:::
+
+---
+
+
+## When you are developing a reactive web app:
+
+- The code is not being executed the way you are used to. Now, the lines of your code are connected 🔌
+- **You can't run the code line by line anymore!!!**
+
+. . .
+
+#### This means that your app `will work` ✅  or `will not work`  🐛
+
+---
+
+## Debugging 🐛
+
+- You get an unexpected error. -> `traceback`
+- You don’t get any errors, but some value is incorrect.  -> `interactive debugger`
+- All the values are correct, but they’re not updated when you expect. -> 🤷‍♀️
+
+:::footer
+Interactive debugger: [Object of type `closure` is not subsettable](https://www.rstudio.com/resources/rstudioconf-2020/object-of-type-closure-is-not-subsettable/)
+:::
+
+---
+
+## Debugging 🐛
+#### Unexpected error: tracebacks in Shiny
+
+```r
+library(shiny)
+
+f <- function(x) g(x)
+g <- function(x) h(x)
+h <- function(x) x * 2
+
+ui <- fluidPage(
+  selectInput("n", "N", 1:10),
+  plotOutput("plot")
+)
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    n <- f(input$n)
+    plot(head(cars, n))
+  }, res = 96)
+}
+shinyApp(ui, server)
+```
+---
+
+## Debugging 🐛
+#### Unexpected error: tracebacks in Shiny
+```
+Error in *: non-numeric argument to binary operator
+  169: g [app.R#4]
+  168: f [app.R#3]
+  167: renderPlot [app.R#13]
+  165: func
+  125: drawPlot
+  111: <reactive:plotObj>
+   95: drawReactive
+   82: renderFunc
+   81: output$plot
+    1: runApp
+```
+
+
+
+::: footer
+If you want to know more check [the case study](https://mastering-shiny.org/action-workflow.html#case-study)
+:::
+
+---
+
+## Debugging 🐛
+#### Debugging reactivity
+
+The hardest type of problem to debug is when your reactive fire in an unexpected order. You can use these functions to read in your console how any parto fo your code is evaluated .
+
+- `print()`
+- `message()` (+ `glue()`)
+- `str()`
+
+---
+
+## Debugging 🐛
+#### Debugging reactivity
+
+```r
+ total <- reactive({
+    total <- input$x + input$y + input$z
+    message(glue("New total is {total}"))
+    total
+  })
+```
+
+---
+
+## Final debugging tip! 🐛
+
+* **Run the server code first outside the app** to check that is working.
+It could be more difficult to detect errors if you have not checked this after moving the code to the app.
+
+
+
+
+
+# DEMO: debugging techniques! 🐛
+
+
+# Tidyevaluation {background-color="#F1FFFA"}
+
+
+---
+
+## Tidyevaluation in Shiny Apps
+#### How to wrap `ggplot2` and `dplyr` function in a Shiny app?
+
+- Normally **when using tidyverse functions** you type the name of the variable directly in the function call. 
+  
+- But now you want to refer to it indirectly: the variable (`carat`) is stored inside another variable (`input$var`).
+
+
+---
+
+## Tidyevaluation in Shiny Apps
+#### How to wrap `ggplot2` and `dplyr` function in a Shiny app?
+
+ ⚠️ `dplyr` 'thinks' you have asked for `filter(diamonds, "carat" > 1)` instead of `filter(diamonds, carat > 1)`
+
+:::footer
+chapter 12 - Mastering Shiny
+:::
+
+---
+
+## Tidyevaluation in Shiny Apps
+#### `.data[[  ]]`  
+
+**ggplot2::aes()**
+```r
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    ggplot(iris, aes(.data[[input$x]], .data[[input$y]])) +
+      geom_point(position = ggforce::position_auto())
+  }, res = 96)
+}
+```
+
+---
+
+## Tidyevaluation in Shiny Apps
+#### `.data[[  ]]`  
+**dplyr::filter()**
+```r
+server <- function(input, output, session) {
+  data <- reactive(diamonds |> 
+           filter(.data[[input$var]] > .env$input$min))
+  output$output <- renderTable(head(data()))
+}
+```
+
+
+# How to avoid code duplication? Intro to **reactive expressions**. {background-color="#F1FFFA"}
+
+
+
+---
+
+## Code duplication
+
+In traditional R scripting, we use two techniques to deal with duplicated code: 
+  
+- we capture the value using a **variable**, or     
+  
+- capture the computation with a **function**.     
+  
+> Are these strategies going to work in our Shiny apps?
+
+:::footer
+Read sections 13.2.1 and 13.2.2 of Mastering Shiny if you want to know more
+:::
+
+---
+
+## Reactive expressions
+
+For Shiny apps to be maximally useful, we need reactive expressions and outputs to update if and only if their inputs change
+
+```r
+reactive({...})
+```
+
+
+
+# DEMO: Adding `reactive({})` functions
+
+---
+
+## Learning outcomes {background-color="#FED9B7"}
+
+1. Create a Shiny app with more than 3 outputs
+2. Deal with tidyevaluation in a Shiny app
+3. Include a `leaflet` map and a `DT` table in a Shiny App
+4. Recognize why it is not possible to use functions and variables in reactive programming
+5. Avoid code duplication through the use of reactive expressions in a Shiny App
+
