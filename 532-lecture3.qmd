@@ -1,5 +1,5 @@
 ---
-title: "L3 - Server"
+title: "L3 - Server: development workflow and reactive expressions"
 institute: "Data Visualization II - DSCI 532 - MDS 2022/23"
 format:
   revealjs:
@@ -43,7 +43,7 @@ format:
 
 - 🌐 [Using `DT` in Shiny](https://rstudio.github.io/DT/shiny.html)  
   
-- 🌐 [Using `lefleat` with Shiny](https://rstudio.github.io/leaflet/shiny.html) 
+- 🌐 [Using `leaflet` with Shiny](https://rstudio.github.io/leaflet/shiny.html) 
   
 - 📚 [Improving `ggplotly` - Interactive web-based data visualization with R, plotly, and shiny (2019) Carson Sievert](https://plotly-r.com/improving-ggplotly.html)  
 
@@ -112,7 +112,7 @@ Adapted from: Rasmussen, N. H., Bansal, M., & Chen, C. Y. (2009). Business dashb
 * **People count birds as long as they like on days of their choosing, then enter their counts online**. 
 
 :::footer
-[FeederWatch Dataset](https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-01-10/readme.md) Tidytuesday 
+[FeederWatch Dataset](https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-01-10/readme.md) Tidytuesday - [FeederWatchProject](https://feederwatch.org/)
 :::
 
 ---
@@ -297,6 +297,12 @@ leaflet(data = quakes[1:20,]) |>
 :::
 :::
 
+
+
+
+
+# DEMO: map {background-color="#F1FFFA"}
+
 ---
 
 ## Extra: Too many points?
@@ -310,12 +316,6 @@ leaflet(quakes) |>
 )
 ```
 
-:::
-:::
-
-
-
-# DEMO: map {background-color="#F1FFFA"}
 
 
 # How can we improve our development **workflow**? {background-color="#F1FFFA"}
@@ -509,6 +509,61 @@ It could be more difficult to detect errors if you have not checked this after m
 
 # DEMO: debugging techniques! 🐛
 
+---
+
+## `DT` tables
+
+Arguments: read [using `DT` in Shiny](https://rstudio.github.io/DT/shiny.html)  
+
+```r
+datatable(filtered_data,
+              caption = 'Table: Observations by location.',
+              extensions = 'Scroller',
+              options=list(deferRender = TRUE,
+                           scrollY = 200,
+                           scroller = TRUE))
+```
+
+
+
+# How to avoid code duplication? Intro to **reactive expressions**. {background-color="#F1FFFA"}
+
+
+
+---
+
+## Code duplication
+
+In traditional R scripting, we use two techniques to deal with duplicated code: 
+  
+- we capture the value using a **variable**, or     
+  
+- capture the computation with a **function**.     
+  
+> Are these strategies going to work in our Shiny apps?
+
+:::footer
+
+Read sections 13.2.1 and 13.2.2 of Mastering Shiny if you want to know more
+
+:::
+
+---
+
+## Reactive expressions
+
+For Shiny apps to be maximally useful, we need reactive expressions and outputs to update if and only if their inputs change
+
+```r
+reactive({...})
+```
+
+
+
+# DEMO: Adding `reactive({})` functions {background-color="#F1FFFA"}
+
+
+
 
 # Tidyevaluation {background-color="#F1FFFA"}
 
@@ -575,7 +630,6 @@ server <- function(input, output, session) {
 
 # DEMO: tidyevaluation in `ggplot2`
 
-
 ---
 
 ## Let's think: Are bar plots always the best choice?
@@ -592,57 +646,35 @@ Image: Allison Horst
 :::
 
 
-
-# How to avoid code duplication? Intro to **reactive expressions**. {background-color="#F1FFFA"}
-
-
-
 ---
 
-## Code duplication
+## Feederwatch app
+Is this the best way to visualize the data?
 
-In traditional R scripting, we use two techniques to deal with duplicated code: 
-  
-- we capture the value using a **variable**, or     
-  
-- capture the computation with a **function**.     
-  
-> Are these strategies going to work in our Shiny apps?
+::: columns
+::: {.column width="30%"}
 
-:::footer
-
-Read sections 13.2.1 and 13.2.2 of Mastering Shiny if you want to know more
+To be continued in lecture 5
 
 :::
 
----
+::: {.column width="70%"}
 
-## Reactive expressions
+![](img/categories-plot.png){.absolute width = 300}
 
-For Shiny apps to be maximally useful, we need reactive expressions and outputs to update if and only if their inputs change
-
-```r
-reactive({...})
-```
-
----
-
-## Reactive expressions
-
-- It’s **lazy**: it doesn’t do any work until it’s called.
-
-- It’s **cached**: it doesn’t do any work the second and subsequent times it’s called because it caches the previous result.
+:::
+:::
 
 
-# DEMO: Adding `reactive({})` functions
 
 ---
 
 ## Learning outcomes {background-color="#FED9B7"}
 
 1. Create a Shiny app with more than 3 outputs
-2. Deal with tidyevaluation in a Shiny app
-3. Include a `leaflet` map and a `DT` table in a Shiny App
-4. Recognize why it is not possible to use functions and variables in reactive programming
+2. Include a `leaflet` map, a `DT` table and a `Plotly` chart in a Shiny App
+3. Deal with tidyevaluation in a Shiny app
+4. Set a workflow to develop a Shiny App efficiently in RStudio
 5. Avoid code duplication through the use of reactive expressions in a Shiny App
+
 
