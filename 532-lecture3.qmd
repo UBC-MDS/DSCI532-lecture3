@@ -1,5 +1,5 @@
 ---
-title: "L3 - Reactivity"
+title: "L3 - Server"
 institute: "Data Visualization II - DSCI 532 - MDS 2022/23"
 format:
   revealjs:
@@ -62,7 +62,7 @@ format:
 
 ---
 
-# Creating a **complex app** 
+## Creating a **complex app** 
 
 - `leaflet` map
 - `DT` table
@@ -70,9 +70,8 @@ format:
 
 
 
----
 
-# DEMO: Code a function {background-color="#F1FFFA"}
+
 
 ---
 
@@ -93,6 +92,230 @@ format:
 ::: footer
 Adapted from: Rasmussen, N. H., Bansal, M., & Chen, C. Y. (2009). Business dashboards: a visual catalog for design and deployment. John Wiley & Sons.
 :::
+
+
+
+
+# pre-DEMO: Dataset {background-color="#F1FFFA"}
+
+
+---
+
+## My data: FeederWatch {background-color="#F1FFFA"} 
+
+𓅮𓅮𓅮
+
+* **FeederWatch** is a survey of birds that visit backyards, nature centers, community areas, and other locales in North America. 
+
+* **Citizen scientists count birds** in areas with plantings, habitat, water, or food that attracts birds. 
+
+* **People count birds as long as they like on days of their choosing, then enter their counts online**. 
+
+:::footer
+[FeederWatch Dataset](https://github.com/rfordatascience/tidytuesday/blob/master/data/2023/2023-01-10/readme.md) Tidytuesday 
+:::
+
+---
+
+## Target audience {background-color="#F1FFFA"} 
+"Citizen-scientists" participating in the program
+   
+**Goal** 𓅮
+Create an app that allow to identify program contributions and to promote future contributions.
+
+---
+
+## Dataset: data quality {background-color="#F1FFFA"} 
+#### `VALID = 0`
+**Observation triggered a flag by the automated system**
+
+- `VALID = 0; REVIEWED = 0`  
+Note that such observations should only be used with caution.
+
+- `VALID = 0; REVIEWED = 1`;  
+Insufficient evidence was provided to confirm the observation. 
+
+::: footer
+[Over 30 Years of Standardized Bird Counts at Supplementary Feeding Stations in North America: A Citizen Science Data Report for Project FeederWatch](https://www.frontiersin.org/articles/10.3389/fevo.2021.619682/full)
+:::
+---
+
+## Dataset: Data quality {background-color="#F1FFFA"}
+#### `VALID = 1`
+**Observation did not trigger the automatic flagging system**
+
+- `VALID = 1; REVIEWED = 0`  
+Accepted into the database without review.
+
+- `VALID = 1; REVIEWED = 1`  
+Approved by an expert reviewer.
+
+
+::: footer
+[Over 30 Years of Standardized Bird Counts at Supplementary Feeding Stations in North America: A Citizen Science Data Report for Project FeederWatch](https://www.frontiersin.org/articles/10.3389/fevo.2021.619682/full)
+:::
+
+# DEMO: data and app basic structure {background-color="#F1FFFA"}
+
+
+---
+
+## Leaflet
+##### Leaflet is one of the most popular open-source JavaScript libraries for interactive maps
+
+::: columns
+::: {.column width="60%"}
+
+```{.r}
+library(leaflet)
+
+
+leaflet() |> 
+addTiles() |>  # Add default OpenStreetMap map tiles
+addMarkers(lng=174.768,
+             lat=-36.852,
+             popup="The birthplace of R")
+
+```
+
+:::
+
+::: {.column width="40%"}
+```{r echo = FALSE}
+library(leaflet)
+
+
+  leaflet() |> 
+  addTiles() |>  # Add default OpenStreetMap map tiles
+  addMarkers(lng=174.768,
+             lat=-36.852,
+             popup="The birthplace of R")
+
+```
+
+:::
+:::
+
+
+
+::: footer
+[Leaflet for R](http://rstudio.github.io/leaflet/)
+:::
+
+---
+
+## Leaflet
+#### Basic Usage
+
+1. Create a map widget by calling `leaflet()`.
+2. Add layers (i.e., features) to the map by using layer functions (e.g. `addTiles`, `addMarkers`, `addPolygons`) to modify the map widget.
+3. Repeat step 2 as desired.
+4. Print the map widget to display it.
+
+
+::: footer
+[Leaflet for R](http://rstudio.github.io/leaflet/)
+:::
+
+---
+
+## Comparing `leaflet` and `ggplot2` 
+
+- Leaflet uses `|>` instead of `+` to separate layers
+- Similar to `ggplot2`, each function is a layer/feature
+- If you are using a data frame you need to specify `latitude` and `longitude`
+
+**In L6 we will learn how to create maps with polygons!**
+
+---
+
+## Comparing `leaflet` and `ggplot2` 
+#### The Formula Interface (`~`)
+
+::: columns
+::: {.column width="40%"}
+
+ The arguments can take a **one-sided formula**, in which case the formula will be evaluated using the data argument as the environment. 
+
+:::
+
+::: {.column width="60%"}
+
+```{.r}
+data(quakes)
+
+# Show first 20 rows from the `quakes` dataset
+leaflet(data = quakes[1:20,]) |> 
+  addTiles() |> 
+  addMarkers(~long,
+            ~lat,
+            popup = ~as.character(mag),
+            label = ~as.character(mag))
+```
+
+
+:::
+:::
+
+
+---
+
+For example, `~x` means the variable `x` in the data object, and you can write arbitrary expressions on the right-hand side, e.g., `~ sqrt(x + 1)`.
+
+
+::: columns
+::: {.column width="60%"}
+
+```{.r}
+data(quakes)
+
+# Show first 20 rows from the `quakes` dataset
+leaflet(data = quakes[1:20,]) |> 
+  addTiles() |> 
+  addMarkers(~long,
+             ~lat,
+             popup = ~as.character(mag), 
+             label = ~as.character(mag))
+```
+
+:::
+
+::: {.column width="40%"}
+
+```{r}
+data(quakes)
+
+# Show first 20 rows from the `quakes` dataset
+leaflet(data = quakes[1:20,]) |> 
+  addTiles() |> 
+  addMarkers(~long,
+             ~lat,
+             popup = ~as.character(mag), 
+             label = ~as.character(mag))
+```
+
+:::
+:::
+
+---
+
+## Extra: Too many points?
+
+
+```{r echo=TRUE}
+leaflet(quakes) |> 
+  addTiles() |> 
+  addMarkers(
+  clusterOptions = markerClusterOptions()
+)
+```
+
+:::
+:::
+
+
+
+# DEMO: map {background-color="#F1FFFA"}
 
 
 # How can we improve our development **workflow**? {background-color="#F1FFFA"}
@@ -129,16 +352,18 @@ shinyApp(ui, server)
 ## Basic development cycle
 #### Seeing your changes
 
-1. Write some code.
-~~2. Launch the app with `Cmd/Ctrl` + `Shift` + `Enter.`~~
-3. Interactively experiment with the app.
-~~4. Close the app.~~
-5. Go to 1.
+1. Write some code.  
+~~2. Launch the app with `Cmd/Ctrl` + `Shift` + `Enter.`~~  
+3. Interactively experiment with the app.  
+~~4. Close the app.~~  
+5. Go to 1.  
 
 `options(shiny.autoreload = TRUE)` ✅ 
 
 :::footer
+
 You can also create a [job](https://github.com/sol-eng/background-jobs/tree/master/shiny-job) to simplify the workflow
+
 :::
 ---
 
@@ -156,7 +381,9 @@ The run app button allows you to choose how the running app will be shown.
 ![](img/run-app.png){.absolute width=250}
   
 :::footer  
+
 Mastering Shiny
+
 :::
 
 
@@ -164,7 +391,9 @@ Mastering Shiny
 > Once you eliminate the impossible, whatever remains, no matter how improbable, must be the truth — Sherlock Holmes
 
 :::footer
+
 Mastering Shiny
+
 :::
 
 ---
@@ -188,7 +417,9 @@ Mastering Shiny
 - All the values are correct, but they’re not updated when you expect. -> 🤷‍♀️
 
 :::footer
+
 Interactive debugger: [Object of type `closure` is not subsettable](https://www.rstudio.com/resources/rstudioconf-2020/object-of-type-closure-is-not-subsettable/)
+
 :::
 
 ---
@@ -236,7 +467,9 @@ Error in *: non-numeric argument to binary operator
 
 
 ::: footer
+
 If you want to know more check [the case study](https://mastering-shiny.org/action-workflow.html#case-study)
+
 :::
 
 ---
@@ -295,16 +528,32 @@ It could be more difficult to detect errors if you have not checked this after m
 ## Tidyevaluation in Shiny Apps
 #### How to wrap `ggplot2` and `dplyr` function in a Shiny app?
 
- ⚠️ `dplyr` 'thinks' you have asked for `filter(diamonds, "carat" > 1)` instead of `filter(diamonds, carat > 1)`
+ ⚠️ If in your Shiny app you write:
+```r
+filter(diamonds, input$var > 1)
+```
+ ⚠️ `dplyr` 'thinks' you have asked for:
+ 
+```r
+filter(diamonds, "carat" > 1)
+```
 
-:::footer
+instead of:
+
+```r
+filter(diamonds, carat > 1)
+```
+
+::: footer
+
 chapter 12 - Mastering Shiny
+
 :::
 
 ---
 
 ## Tidyevaluation in Shiny Apps
-#### `.data[[  ]]`  
+#### Solution: use `.data[[  ]]`  
 
 **ggplot2::aes()**
 ```r
@@ -316,18 +565,32 @@ server <- function(input, output, session) {
 }
 ```
 
+::: footer
+
+[chapter 12](https://mastering-shiny.org/action-tidy.html) - Mastering Shiny
+
+:::
+
+
+
+# DEMO: tidyevaluation in `ggplot2`
+
+
 ---
 
-## Tidyevaluation in Shiny Apps
-#### `.data[[  ]]`  
-**dplyr::filter()**
-```r
-server <- function(input, output, session) {
-  data <- reactive(diamonds |> 
-           filter(.data[[input$var]] > .env$input$min))
-  output$output <- renderTable(head(data()))
-}
-```
+## Let's think: Are bar plots always the best choice?
+Boxplots, violin plots and density plots could be interesting choices... 
+
+
+
+![](img/summary.jpg)
+
+
+
+::: footer
+Image: Allison Horst
+:::
+
 
 
 # How to avoid code duplication? Intro to **reactive expressions**. {background-color="#F1FFFA"}
@@ -347,7 +610,9 @@ In traditional R scripting, we use two techniques to deal with duplicated code:
 > Are these strategies going to work in our Shiny apps?
 
 :::footer
+
 Read sections 13.2.1 and 13.2.2 of Mastering Shiny if you want to know more
+
 :::
 
 ---
@@ -360,6 +625,13 @@ For Shiny apps to be maximally useful, we need reactive expressions and outputs 
 reactive({...})
 ```
 
+---
+
+## Reactive expressions
+
+- It’s **lazy**: it doesn’t do any work until it’s called.
+
+- It’s **cached**: it doesn’t do any work the second and subsequent times it’s called because it caches the previous result.
 
 
 # DEMO: Adding `reactive({})` functions
